@@ -14,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
     this.castleHp  = data.castleHp || 300;
     this.castleMaxHp = 300;
     this.inventory = data.inventory || null;
+    this.hiredCompanions = data.hiredCompanions || [];
     this.currentWeaponIdx = 0;
   }
 
@@ -170,13 +171,18 @@ export default class GameScene extends Phaser.Scene {
     if (this.classId === 'noble') {
       this.spawnCompanion(this.player.x - 70, this.player.y);
     }
+    const offsets = [70, -140, 140, -210];
+    for (let i = 0; i < this.hiredCompanions.length; i++) {
+      const ox = offsets[i % offsets.length];
+      this.spawnCompanion(this.player.x + ox, this.player.y, this.hiredCompanions[i]);
+    }
   }
 
-  spawnCompanion(x, y) {
+  spawnCompanion(x, y, spriteKey = 'companion_wisp') {
     const comp = {
       x, y,
       hp: 60, maxHp: 60,
-      sprite: this.add.image(x, y, 'companion_wisp').setDepth(20),
+      sprite: this.add.image(x, y, spriteKey).setDepth(20),
       target: null,
       fireTimer: 0,
     };
@@ -728,6 +734,7 @@ export default class GameScene extends Phaser.Scene {
       castleMaxHp: this.castleMaxHp,
       inventory: this.inventory,
       kills: this.kills,
+      hiredCompanions: this.hiredCompanions,
     });
   }
 

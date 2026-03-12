@@ -22,6 +22,7 @@ export default class TownScene extends Phaser.Scene {
     this.currentTab = TAB_SHOP;
     this.classDef   = CLASSES.find(c => c.id === this.classId);
     this.innVisited = false;
+    this.hiredCompanions = data.hiredCompanions || [];
   }
 
   create() {
@@ -288,10 +289,16 @@ export default class TownScene extends Phaser.Scene {
         fontSize: '13px', fontFamily: 'monospace', color: canAfford ? '#ffd700' : '#884400',
       }).setOrigin(0.5));
 
-      if (canAfford) {
+      const alreadyHired = this.hiredCompanions.includes(comp.key);
+      if (alreadyHired) {
+        this.panelContent.push(this.add.text(cx + 145, cy + 174, 'HIRED', {
+          fontSize: '13px', fontFamily: 'monospace', color: '#44ff44',
+        }).setOrigin(0.5));
+      } else if (canAfford) {
         bg.setInteractive(new Phaser.Geom.Rectangle(cx, cy, 290, 200), Phaser.Geom.Rectangle.Contains);
         bg.on('pointerdown', () => {
           this.gold -= comp.cost;
+          this.hiredCompanions.push(comp.key);
           this.refreshInventory();
           this.showMessage(`${comp.name} will join you next wave!`);
           this.switchTab(TAB_BARRACKS);
@@ -463,6 +470,11 @@ export default class TownScene extends Phaser.Scene {
       case 'hp_boost':
         this.castleHp = Math.min(this.castleMaxHp, this.castleHp + 35);
         break;
+      case 'companion':
+        if (!this.hiredCompanions.includes('companion_wisp')) {
+          this.hiredCompanions.push('companion_wisp');
+        }
+        break;
       case 'random_weapon':
         const available = Object.keys(WEAPONS).filter(k => !this.inventory.some(s => s?.weaponId === k));
         if (available.length > 0) {
@@ -498,6 +510,7 @@ export default class TownScene extends Phaser.Scene {
       castleHp: this.castleHp,
       castleMaxHp: this.castleMaxHp,
       inventory: this.inventory,
+      hiredCompanions: this.hiredCompanions,
     });
   }
 }
