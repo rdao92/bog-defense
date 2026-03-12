@@ -351,19 +351,15 @@ export default class GameScene extends Phaser.Scene {
   // ── Update ─────────────────────────────────────────────────────────────────
   update(time, delta) {
     if (this.paused || this.waveComplete) return;
-    const dt = Math.min(delta / 1000, 0.05); // cap dt to prevent spiral of death
-    try {
-      this.handlePlayerMovement(dt);
-      this.handleShooting(time);
-      this.updateEnemySpawning(time);
-      this.updateEnemies(dt);
-      this.updateProjectiles(dt);
-      this.updateCompanions(time, dt);
-      this.checkWaveComplete();
-      this.updatePlayerRing();
-    } catch (e) {
-      console.error('Game update error:', e);
-    }
+    const dt = Math.min(delta / 1000, 0.05);
+    this.handlePlayerMovement(dt);
+    this.handleShooting(time);
+    this.updateEnemySpawning(time);
+    this.updateEnemies(dt);
+    this.updateProjectiles(dt);
+    this.updateCompanions(time, dt);
+    this.checkWaveComplete();
+    this.updatePlayerRing();
   }
 
   handlePlayerMovement(dt) {
@@ -511,12 +507,12 @@ export default class GameScene extends Phaser.Scene {
       proj.x += proj.vx * dt;
       proj.y += proj.vy * dt;
       proj.distTravelled += Math.hypot(proj.vx * dt, proj.vy * dt);
-      proj.sprite.setPosition(proj.x, proj.y);
+      if (proj.sprite && proj.sprite.active) proj.sprite.setPosition(proj.x, proj.y);
 
       // Out of range / bounds
       if (proj.distTravelled > (proj.wep.range || 700) || proj.x < -50 || proj.x > W+50 || proj.y < -50 || proj.y > H+50) {
         proj.alive = false;
-        proj.sprite.destroy();
+        if (proj.sprite && proj.sprite.active) proj.sprite.destroy();
         continue;
       }
 
@@ -533,7 +529,7 @@ export default class GameScene extends Phaser.Scene {
           }
           if (proj.pierce <= 0) {
             proj.alive = false;
-            proj.sprite.destroy();
+            if (proj.sprite && proj.sprite.active) proj.sprite.destroy();
             break;
           } else {
             proj.pierce--;
