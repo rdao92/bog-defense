@@ -5,13 +5,13 @@ export default class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
 
   create() {
-    this.generateBackground();
-    this.generateCastle();
-    this.generatePlayerClasses();
-    this.generateEnemies();
-    this.generateProjectiles();
-    this.generateUI();
-    this.generateEffects();
+    try { this.generateBackground(); } catch(e) { console.error('bg', e); }
+    try { this.generateCastle(); } catch(e) { console.error('castle', e); }
+    try { this.generatePlayerClasses(); } catch(e) { console.error('players', e); }
+    try { this.generateEnemies(); } catch(e) { console.error('enemies', e); }
+    try { this.generateProjectiles(); } catch(e) { console.error('projectiles', e); }
+    try { this.generateUI(); } catch(e) { console.error('ui', e); }
+    try { this.generateEffects(); } catch(e) { console.error('effects', e); }
     this.scene.start('MainMenu');
   }
 
@@ -359,7 +359,7 @@ export default class BootScene extends Phaser.Scene {
       g.fillCircle(21, 13, 1.5);
       // Tail
       g.lineStyle(2, 0x5a4a30);
-      g.beginPath(); g.moveTo(22, 22); g.quadraticBezierTo(30, 28, 28, 26); g.strokePath();
+      g.beginPath(); g.moveTo(22, 22); g.lineTo(30, 28); g.lineTo(28, 26); g.strokePath();
     });
 
     // Bog Sprite / Wisp - flying glowing ball
@@ -481,7 +481,7 @@ export default class BootScene extends Phaser.Scene {
       g.fillCircle(40, 10, 2);
       // Tail
       g.lineStyle(4, 0x1a5a2a);
-      g.beginPath(); g.moveTo(32, 42); g.quadraticBezierTo(50, 54, 54, 50); g.strokePath();
+      g.beginPath(); g.moveTo(32, 42); g.lineTo(50, 54); g.lineTo(54, 50); g.strokePath();
     });
 
     // Armored Troll
@@ -601,13 +601,11 @@ export default class BootScene extends Phaser.Scene {
     this.tex('proj_vine', 14, 5, g => {
       g.lineStyle(3, 0x2d8a00);
       g.beginPath();
-      g.moveTo(0, 2);
-      g.quadraticBezierTo(7, 0, 14, 2);
+      g.moveTo(0, 2); g.lineTo(7, 0); g.lineTo(14, 2);
       g.strokePath();
       g.lineStyle(2, 0x4cbb17);
       g.beginPath();
-      g.moveTo(0, 3);
-      g.quadraticBezierTo(7, 1, 14, 3);
+      g.moveTo(0, 3); g.lineTo(7, 1); g.lineTo(14, 3);
       g.strokePath();
     });
 
@@ -833,7 +831,7 @@ export default class BootScene extends Phaser.Scene {
         break;
       case 'whip':
         g.lineStyle(4, color);
-        g.beginPath(); g.moveTo(8, 32); g.quadraticBezierTo(20, 10, 32, 20); g.strokePath();
+        g.beginPath(); g.moveTo(8, 32); g.lineTo(20, 10); g.lineTo(32, 20); g.strokePath();
         g.lineStyle(2, 0x2d8a00);
         g.beginPath(); g.moveTo(28, 18); g.lineTo(34, 14); g.strokePath();
         break;
@@ -913,8 +911,7 @@ export default class BootScene extends Phaser.Scene {
       g.lineStyle(2, C.BOG_LIGHT, 0.5);
       for (let x = 20; x < 680; x += 30) {
         g.beginPath();
-        g.moveTo(x, 0);
-        g.quadraticBezierTo(x + 8, 12, x + 15, 8);
+        g.moveTo(x, 0); g.lineTo(x + 8, 12); g.lineTo(x + 15, 8);
         g.strokePath();
       }
     });
