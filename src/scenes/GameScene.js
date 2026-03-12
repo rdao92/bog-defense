@@ -483,10 +483,17 @@ export default class GameScene extends Phaser.Scene {
       enemy.x += Math.cos(angle) * enemy.speed * dt;
       enemy.y += Math.sin(angle) * enemy.speed * dt;
 
-      enemy.sprite.setPosition(enemy.x, enemy.y);
-      enemy.sprite.setRotation(angle + Math.PI / 2);
-      enemy.hpBg.setPosition(enemy.x, enemy.y - enemy.def.size / 2 - 6);
-      enemy.hpBar.setPosition(enemy.x - 50 * 0.5 * (1 - enemy.hp/enemy.maxHp), enemy.y - enemy.def.size / 2 - 6);
+      if (enemy.sprite && enemy.sprite.active) {
+        enemy.sprite.setPosition(enemy.x, enemy.y);
+        enemy.sprite.setRotation(angle + Math.PI / 2);
+      }
+      const barY = enemy.y - enemy.def.size / 2 - 6;
+      const hpPct = Math.max(0, enemy.hp / enemy.maxHp);
+      if (enemy.hpBg  && enemy.hpBg.active)  enemy.hpBg.setPosition(enemy.x, barY);
+      if (enemy.hpBar && enemy.hpBar.active)  {
+        enemy.hpBar.setScaleX(0.5 * hpPct);
+        enemy.hpBar.setPosition(enemy.x - 50 * 0.5 * (1 - hpPct), barY);
+      }
 
       // Reached castle?
       if (Phaser.Math.Distance.Between(enemy.x, enemy.y, W/2, CASTLE_Y) < 80) {
@@ -553,21 +560,18 @@ export default class GameScene extends Phaser.Scene {
     const dmg = Math.max(1, proj.damage - armor);
     enemy.hp -= dmg;
 
-    // Damage number
     const isCrit = proj.isCrit;
     this.spawnDamageNumber(enemy.x, enemy.y, dmg, isCrit);
 
     // Hit spark
-    const spark = this.add.image(enemy.x, enemy.y, 'hit_spark').setDepth(30).setScale(isCrit ? 1.5 : 1);
-    this.tweens.add({ targets: spark, alpha: 0, scale: 0.5, duration: 200, onComplete: () => spark.destroy() });
+    try {
+      const spark = this.add.image(enemy.x, enemy.y, 'hit_spark').setDepth(30).setScale(isCrit ? 1.5 : 1);
+      this.tweens.add({ targets: spark, alpha: 0, scale: 0.5, duration: 200, onComplete: () => spark.destroy() });
+    } catch (e) { /* non-critical visual */ }
 
-    // Update HP bar
-    const pct = Math.max(0, enemy.hp / enemy.maxHp);
-    enemy.hpBar.setScaleX(0.5 * pct);
-
+    // Kill check BEFORE touching hp bar (so a bad hp bar can't block the kill)
     if (enemy.hp <= 0) {
       this.killEnemy(enemy, true);
-      // Crit tracking
       if (isCrit) {
         this.player.critCount++;
         if (this.player.critCount >= 7) this.activateRampage();
@@ -575,6 +579,12 @@ export default class GameScene extends Phaser.Scene {
         this.player.critCount = Math.max(0, this.player.critCount - 1);
         if (this.player.critCount < 7) this.rampageText.setText('');
       }
+    } else {
+      // Only update hp bar if enemy survived
+      try {
+        const pct = Math.max(0, enemy.hp / enemy.maxHp);
+        if (enemy.hpBar && enemy.hpBar.active) enemy.hpBar.setScaleX(0.5 * pct);
+      } catch (e) { /* non-critical visual */ }
     }
   }
 
