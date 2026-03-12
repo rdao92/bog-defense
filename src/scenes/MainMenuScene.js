@@ -150,7 +150,7 @@ export default class MainMenuScene extends Phaser.Scene {
       'Good luck, Bog Defender!',
     ];
 
-    this.add.text(W/2, H/2 - 200, helpText.join('\n'), {
+    const helpBody = this.add.text(W/2, H/2 - 200, helpText.join('\n'), {
       fontSize: '15px',
       fontFamily: 'monospace',
       color: '#90ee90',
@@ -164,11 +164,7 @@ export default class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     closeBtn.on('pointerdown', () => {
-      [overlay, panel, closeBtn].forEach(o => o.destroy());
-      this.children.list
-        .filter(c => c.type === 'Text' && c !== closeBtn)
-        .slice(-helpText.length)
-        .forEach(t => t.destroy());
+      [overlay, panel, helpBody, closeBtn].forEach(o => o.destroy());
     });
   }
 
