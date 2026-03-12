@@ -104,7 +104,7 @@ export default class GameScene extends Phaser.Scene {
 
   updateCastleHpBar() {
     const pct = Math.max(0, this.castleHp / this.castleMaxHp);
-    this.castleHpBar.setScaleX(pct);
+    this.castleHpBar.setScale(pct, 1);
     this.castleHpBar.setX(W / 2 - 100 * (1 - pct));
     this.castleHpText.setText(`${Math.ceil(this.castleHp)}`);
     if (pct < 0.4) this.castleHpBar.setTexture('hpbar_fill_red');
@@ -276,7 +276,7 @@ export default class GameScene extends Phaser.Scene {
   updateHudKills() { this.hudKills.setText(`Kills: ${this.kills}`); }
   updateHudHp() {
     const pct = Math.max(0, this.player.hp / this.player.maxHp);
-    this.hudHpBar.setScaleX(0.9 * pct);
+    this.hudHpBar.setScale(0.9 * pct, 1);
     this.hudHpBar.setX(100 - 90 * (1 - pct));
   }
   updateHudEnemies() {
@@ -466,7 +466,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateEnemies(dt) {
-    const toRemove = [];
     for (const enemy of this.enemies) {
       if (!enemy.alive) continue;
 
@@ -487,7 +486,7 @@ export default class GameScene extends Phaser.Scene {
       const hpPct = Math.max(0, enemy.hp / enemy.maxHp);
       if (enemy.hpBg  && enemy.hpBg.active)  enemy.hpBg.setPosition(enemy.x, barY);
       if (enemy.hpBar && enemy.hpBar.active)  {
-        enemy.hpBar.setScaleX(0.5 * hpPct);
+        enemy.hpBar.setScale(0.5 * hpPct, 0.7);
         enemy.hpBar.setPosition(enemy.x - 50 * 0.5 * (1 - hpPct), barY);
       }
 
@@ -498,6 +497,8 @@ export default class GameScene extends Phaser.Scene {
         if (enemy.def.explodeOnDeath) this.spawnExplosion(enemy.x, enemy.y, enemy.def);
       }
     }
+
+    this.enemies = this.enemies.filter(e => e.alive);
   }
 
   updateProjectiles(dt) {
@@ -579,7 +580,7 @@ export default class GameScene extends Phaser.Scene {
       // Only update hp bar if enemy survived
       try {
         const pct = Math.max(0, enemy.hp / enemy.maxHp);
-        if (enemy.hpBar && enemy.hpBar.active) enemy.hpBar.setScaleX(0.5 * pct);
+        if (enemy.hpBar && enemy.hpBar.active) enemy.hpBar.setScale(0.5 * pct, 0.7);
       } catch (e) { /* non-critical visual */ }
     }
   }
