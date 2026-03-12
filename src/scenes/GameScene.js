@@ -281,7 +281,7 @@ export default class GameScene extends Phaser.Scene {
   }
   updateHudEnemies() {
     const alive = this.enemies.filter(e => e.alive).length;
-    const inQueue = this.spawnQueue.reduce((s, g) => s + g.count, 0);
+    const inQueue = this.spawnQueue.length;
     this.hudEnemies.setText(`Enemies: ${alive + inQueue}`);
   }
 
@@ -351,17 +351,19 @@ export default class GameScene extends Phaser.Scene {
   // ── Update ─────────────────────────────────────────────────────────────────
   update(time, delta) {
     if (this.paused || this.waveComplete) return;
-    const dt = delta / 1000;
-
-    this.handlePlayerMovement(dt);
-    this.handleShooting(time);
-    this.updateEnemySpawning(time);
-    this.updateEnemies(dt);
-    this.updateProjectiles(dt);
-    this.updateCompanions(time, dt);
-    this.updateDamageNumbers(dt);
-    this.checkWaveComplete();
-    this.updatePlayerRing();
+    const dt = Math.min(delta / 1000, 0.05); // cap dt to prevent spiral of death
+    try {
+      this.handlePlayerMovement(dt);
+      this.handleShooting(time);
+      this.updateEnemySpawning(time);
+      this.updateEnemies(dt);
+      this.updateProjectiles(dt);
+      this.updateCompanions(time, dt);
+      this.checkWaveComplete();
+      this.updatePlayerRing();
+    } catch (e) {
+      console.error('Game update error:', e);
+    }
   }
 
   handlePlayerMovement(dt) {
@@ -546,6 +548,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   hitEnemy(enemy, proj) {
+    if (!enemy.alive) return;
     const armor = enemy.def.armor || 0;
     const dmg = Math.max(1, proj.damage - armor);
     enemy.hp -= dmg;
@@ -595,9 +598,9 @@ export default class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.def);
     }
 
-    enemy.sprite.destroy();
-    enemy.hpBg.destroy();
-    enemy.hpBar.destroy();
+    if (enemy.sprite && enemy.sprite.active) enemy.sprite.destroy();
+    if (enemy.hpBg  && enemy.hpBg.active)  enemy.hpBg.destroy();
+    if (enemy.hpBar && enemy.hpBar.active)  enemy.hpBar.destroy();
   }
 
   spawnExplosion(x, y, def, wepType) {
